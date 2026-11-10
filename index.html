@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14251f">
+<title>แกะเพลงเป็นโน้ตพิณ</title>
+<style>
+:root{color-scheme:dark;--bg:#101a17;--panel:#1b2a24;--green:#8de0ad;--muted:#b7c7bd}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(140deg,#101a17,#20382c);color:#f4fff7;font:16px system-ui,sans-serif}
+main{max-width:920px;margin:auto;padding:22px 16px 50px}h1{margin:0 0 6px;font-size:clamp(26px,5vw,40px)}p{color:var(--muted);line-height:1.6}
+.panel{background:#1b2a24;border:1px solid #385344;border-radius:18px;padding:18px;margin:16px 0}
+button,.filebtn{background:#8de0ad;color:#102018;border:0;border-radius:11px;padding:11px 16px;font-weight:700;cursor:pointer}
+button.secondary{background:#30483b;color:#f4fff7;border:1px solid #587461}button:disabled{opacity:.45;cursor:not-allowed}
+input,select{background:#102019;color:white;border:1px solid #557060;border-radius:9px;padding:10px;max-width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:#102019;padding:12px;border-radius:12px}.stat b{display:block;color:var(--green);font-size:22px}
+#notes{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.note{background:#263e32;border:1px solid #587461;border-radius:12px;padding:10px 12px;min-width:70px;text-align:center}.note strong{display:block;color:#a5f0bd;font-size:21px}.note small{color:#c4d6ca}
+table{width:100%;border-collapse:collapse;margin-top:12px}td,th{padding:9px;border-bottom:1px solid #405849;text-align:left}
+#status{color:#a5f0bd}.hint{font-size:13px}.warning{border-left:4px solid #e8bd69;padding-left:12px}
+a{color:#a5f0bd}
+</style></head>
+<body><main>
+<h1>🎸 แกะเพลงเป็นโน้ตพิณ</h1>
+<p>อัปโหลดเพลง วิเคราะห์ระดับเสียง แล้วแสดงโน้ต โด–เร–มี พร้อมชื่อโน้ตสากลและตำแหน่งพิณโดยประมาณ</p>
+<section class="panel">
+<h2>1. เลือกไฟล์เพลง</h2>
+<div class="row"><input id="audioFile" type="file" accept="audio/*"><button id="analyze">วิเคราะห์เพลง</button></div>
+<p id="status">รองรับไฟล์เสียงที่เบราว์เซอร์เปิดได้ เช่น MP3, WAV, M4A (ขึ้นกับอุปกรณ์)</p>
+<audio id="player" controls style="width:100%;margin-top:8px"></audio>
+</section>
+<section class="panel">
+<h2>2. ตั้งค่าการแสดงโน้ต</h2>
+<div class="row">
+<label>คีย์อ้างอิง <select id="key"><option value="0">C / โด</option><option value="2">D / เร</option><option value="4">E / มี</option><option value="5">F / ฟา</option><option value="7">G / ซอล</option><option value="9">A / ลา</option><option value="11">B / ที</option></select></label>
+<label>ความไว <select id="sensitivity"><option value="low">คัดโน้ตชัด (แนะนำ)</option><option value="high">เก็บโน้ตถี่ขึ้น</option></select></label>
+<label>จำนวนสายพิณ <select id="strings"><option value="3">3 สาย (ประมาณ)</option><option value="4">4 สาย (ประมาณ)</option></select></label>
+</div>
+<div class="row" style="margin-top:14px"><button id="playNotes" disabled>▶ ฟังโน้ตที่แกะได้</button><button id="stopNotes" class="secondary" disabled>หยุด</button><button id="download" class="secondary" disabled>ดาวน์โหลดโน้ต .txt</button></div>
+</section>
+<section class="panel">
+<h2>3. ผลการแกะเพลง</h2>
+<div class="stats"><div class="stat">โน้ตที่พบ<b id="count">—</b></div><div class="stat">ความยาวเสียง<b id="duration">—</b></div><div class="stat">ความถี่พื้นฐาน<b id="range">—</b></div></div>
+<div id="notes"></div>
+<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>เวลา</th><th>โน้ตไทย</th><th>โน้ตสากล</th><th>ตำแหน่งพิณโดยประมาณ</th></tr></thead><tbody id="rows"><tr><td colspan="5">ยังไม่มีผลวิเคราะห์</td></tr></tbody></table></div>
+</section>
+<section class="panel">
+<h2>ข้อควรรู้</h2>
+<p class="warning">ระบบนี้วิเคราะห์เสียงในอุปกรณ์ด้วยการตรวจจับความถี่ เหมาะกับทำนองเดี่ยวหรือเสียงเครื่องดนตรีที่เด่นชัด หากเพลงมีเสียงร้อง กลอง เบส และเครื่องดนตรีหลายชิ้นพร้อมกัน อาจแกะผิดหรือจับเสียงประสานแทนเมโลดี้ได้ การแปลงเป็นตำแหน่งสาย/ช่องพิณเป็นค่าประมาณ และควรทดลองฟังปรับด้วยหูอีกครั้ง</p>
+<p class="hint">ไฟล์เสียงไม่ถูกอัปโหลดไปเซิร์ฟเวอร์ การประมวลผลทำในเบราว์เซอร์ของคุณ</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let audioBuffer=null, results=[], audioCtx=null, playToken=0;
+const thai=['โด','โด♯','เร','เร♯','มี','ฟา','ฟา♯','ซอล','ซอล♯','ลา','ลา♯','ที'];
+const western=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function midiName(m){return western[((m%12)+12)%12]+(Math.floor(m/12)-1)}
+function solfege(m,key){let d=((m%12-key)%12+12)%12;let names=['โด','โด♯','เร','เร♯','มี','ฟา','ฟา♯','ซอล','ซอล♯','ลา','ลา♯','ที'];return names[d]}
+function freqMidi(f){return Math.round(69+12*Math.log2(f/440))}
+function estimatePitch(buf,sr){
+ const n=buf.length, minF=75,maxF=1200, minLag=Math.floor(sr/maxF),maxLag=Math.min(Math.floor(sr/minF),Math.floor(n/2));
+ let best=0,bestCorr=0;
+ // normalized autocorrelation with mean removal
+ let mean=0;for(let i=0;i<n;i++)mean+=buf[i];mean/=n;
+ for(let lag=minLag;lag<=maxLag;lag++){
+  let a=0,b=0,c=0;
+  for(let i=0;i<n-lag;i++){let x=buf[i]-mean,y=buf[i+lag]-mean;a+=x*y;b+=x*x;c+=y*y}
+  let corr=a/Math.sqrt((b*c)||1);
+  if(corr>bestCorr){bestCorr=corr;best=lag}
+ }
+ if(bestCorr<.72||!best)return null;
+ return {freq:sr/best,confidence:bestCorr};
+}
+function analyze(){
+ if(!audioBuffer)return;
+ const sr=audioBuffer.sampleRate,ch=audioBuffer.getChannelData(0),frame=Math.floor(sr*.09),hop=Math.floor(sr*.045),raw=[];
+ for(let p=0;p+frame<ch.length;p+=hop){
+  let seg=ch.slice(p,p+frame),rms=0;for(let x of seg)rms+=x*x;rms=Math.sqrt(rms/seg.length);
+  if(rms<.012)continue;
+  let pitch=estimatePitch(seg,sr);if(pitch)raw.push({t:p/sr,f:pitch.freq,m:freqMidi(pitch.freq),conf:pitch.confidence});
+ }
+ // collapse adjacent frames into stable note segments
+ let groups=[];
+ for(let x of raw){let last=groups[groups.length-1];if(last&&Math.abs(last.m-x.m)<=1&&x.t-last.end<.14){last.end=x.t+.09;last.samples++;last.conf+=x.conf}else groups.push({t:x.t,end:x.t+.09,m:x.m,samples:1,conf:x.conf})}
+ let minDur=$('sensitivity').value==='high'?.07:.13;
+ results=groups.filter(g=>g.end-g.t>=minDur).map(g=>({...g,conf:g.conf/g.samples}));
+ render();
+}
+function phinPosition(m){
+ // Generic approximate chromatic fret mapping; tuning varies by instrument.
+ let strings=Number($('strings').value), openMidi=[55,62,67,74].slice(0,strings);
+ let best=null;
+ openMidi.forEach((o,i)=>{let fret=m-o;if(fret>=0&&fret<=18&&(!best||fret<best.fret))best={string:i+1,fret}});
+ return best?`สาย ${best.string} ช่อง ${best.fret}`:'นอกช่วงตำแหน่งตัวอย่าง';
+}
+function render(){
+ $('count').textContent=results.length;$('duration').textContent=audioBuffer.duration.toFixed(1)+' วินาที';
+ $('range').textContent=results.length?Math.min(...results.map(x=>x.f)).toFixed(0)+'–'+Math.max(...results.map(x=>x.f)).toFixed(0)+' Hz':'ไม่พบ';
+ $('notes').innerHTML=results.map(x=>`<div class="note"><strong>${solfege(x.m,Number($('key').value))}</strong><small>${midiName(x.m)}</small></div>`).join('');
+ $('rows').innerHTML=results.map((x,i)=>`<tr><td>${i+1}</td><td>${x.t.toFixed(2)}s</td><td>${solfege(x.m,Number($('key').value))}</td><td>${midiName(x.m)}</td><td>${phinPosition(x.m)}</td></tr>`).join('')||'<tr><td colspan="5">ไม่พบโน้ตที่ชัดเจน ลองใช้ไฟล์ทำนองเดี่ยวหรือเพิ่มความดัง</td></tr>';
+ $('playNotes').disabled=!results.length;$('stopNotes').disabled=!results.length;$('download').disabled=!results.length;
+}
+$('audioFile').addEventListener('change',async e=>{
+ let f=e.target.files[0];if(!f)return;
+ $('player').src=URL.createObjectURL(f);$('status').textContent='กำลังอ่านไฟล์ '+f.name;
+ try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioBuffer=await audioCtx.decodeAudioData(await f.arrayBuffer());$('status').textContent='อ่านไฟล์สำเร็จ กด “วิเคราะห์เพลง” ได้เลย';}
+ catch(err){audioBuffer=null;$('status').textContent='อ่านไฟล์ไม่ได้ กรุณาลองไฟล์ MP3 หรือ WAV';}
+});
+$('analyze').onclick=()=>{if(!audioBuffer){$('status').textContent='กรุณาเลือกไฟล์เพลงก่อน';return}$('status').textContent='กำลังวิเคราะห์เสียง...';setTimeout(()=>{analyze();$('status').textContent='วิเคราะห์เสร็จแล้ว — ตรวจสอบและแก้โน้ตด้วยการฟังอีกครั้ง';},30)};
+['key','strings','sensitivity'].forEach(id=>$(id).onchange=()=>{if(results.length)render()});
+$('stopNotes').onclick=()=>{playToken++;if(audioCtx)audioCtx.close().catch(()=>{});audioCtx=null};
+$('playNotes').onclick=async()=>{
+ if(!results.length)return;playToken++;let token=playToken;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
+ let start=audioCtx.currentTime+.1;
+ results.forEach((x,i)=>{let osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),t=start+i*.32;osc.frequency.value=x.f;osc.type='triangle';gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.18,t+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+.27);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(t);osc.stop(t+.29)});
+};
+$('download').onclick=()=>{
+ let text='แกะเพลงเป็นโน้ตพิณ\\n'+results.map((x,i)=>`${i+1}. ${x.t.toFixed(2)}s | ${solfege(x.m,Number($('key').value))} | ${midiName(x.m)} | ${phinPosition(x.m)}`).join('\\n');
+ let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download='phin-notes.txt';a.click();URL.revokeObjectURL(a.href);
+};
+</script></body></html>
